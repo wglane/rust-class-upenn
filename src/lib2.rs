@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use std::fs::File;
 use std::io::Read;
 
@@ -14,19 +15,30 @@ use std::io::Read;
 // split_ref must have the return type Vec<&str>
 // split_clone must have the return type Vec<String>
 
+fn split_ref(s: &str) -> Vec<&str> {
+    s.split(|c| c == ' ').collect::<Vec<&str>>()
+}
+
+fn split_clone(s: &str) -> Vec<String> {
+    s.split(|c| c == ' ')
+        .into_iter()
+        .map(|s| String::from(s))
+        .collect::<Vec<String>>()
+}
+
 #[test]
-fn split_ref_tests(){
+fn split_ref_tests() {
     let string = "Hello World!".to_string();
-    assert_eq!(split_ref(& string), ["Hello", "World!"]);
-    assert_eq!(split_ref("Hello World!"), & ["Hello", "World!"]);
+    assert_eq!(split_ref(&string), ["Hello", "World!"]);
+    assert_eq!(split_ref("Hello World!"), &["Hello", "World!"]);
     assert_eq!(split_ref("Hello World!"), vec!["Hello", "World!"]);
 }
 
 #[test]
-fn split_clone_tests(){
+fn split_clone_tests() {
     let string = "Hello World!".to_string();
-    assert_eq!(split_clone(& string), ["Hello", "World!"]);
-    assert_eq!(split_clone("Hello World!"), & ["Hello", "World!"]);
+    assert_eq!(split_clone(&string), ["Hello", "World!"]);
+    assert_eq!(split_clone("Hello World!"), &["Hello", "World!"]);
     assert_eq!(split_clone("Hello World!"), vec!["Hello", "World!"]);
 }
 
@@ -39,11 +51,14 @@ fn split_clone_tests(){
 // references. Write additional tests.
 //
 
-// #[test]
-// fn pick_longest_tests() {
-//     assert_eq!(pick_longest(& "cat".to_string(), & "dog".to_string()), "cat");
-// }
+fn pick_longest(s1: &str, s2: &str) -> String {
+    String::from(if s2.len() > s1.len() { s2 } else { s1 })
+}
 
+#[test]
+fn pick_longest_tests() {
+    assert_eq!(pick_longest(&"cat".to_string(), &"dog".to_string()), "cat");
+}
 
 // Question 1:
 //For the curious, attempt to return reference, that is:
@@ -52,7 +67,6 @@ fn split_clone_tests(){
 //
 // What goes wrong when you try to implement this function? Why is this
 // the case?
-
 
 // Problem 3.
 // Write a function that returns all the contents of a file as a single String.
@@ -64,8 +78,22 @@ fn split_clone_tests(){
 
 // Use .expect("ignoring error: ") to ignore the Result<...> type in open() and
 // read_to_string. We learn error handling later.
-fn print_contents_of_file(path : &str) -> String {
-    unimplemented!()
+fn print_contents_of_file(path: &str) -> String {
+    let mut f = File::open(path).expect("path could not be read.");
+    let mut content = String::new();
+
+    f.read_to_string(&mut content)
+        .expect("file could not be put into string.");
+
+    content
+}
+
+#[test]
+fn test_print_contents_of_file() {
+    assert_eq!(
+        print_contents_of_file("src/foo.txt"),
+        String::from("hello world")
+    );
 }
 
 // Problem 4.
@@ -76,22 +104,22 @@ fn print_contents_of_file(path : &str) -> String {
 #[test]
 fn add1_test() {
     let mut x = 1;
-    add1(x);
+    add1(&mut x);
     assert_eq!(x, 2);
 }
 
-fn add1(mut x : i32) -> () {
-    x += 1;
+fn add1(x: &mut i32) -> () {
+    *x += 1;
 }
 
 // Problem 5.
 // Error says: cannot assign to immutable borrowed content `*str1`
 // But we declared it mutable? Fix by changing only the line below.
-// fn mut2() {
-//     let hello = String::from("hello");
+fn mut2() {
+    let hello = String::from("hello");
 
-//     // CHANGE ONLY THIS LINE:
-//     let mut str1: & String = & String::from("str1");
+    // CHANGE ONLY THIS LINE:
+    let str1: &mut String = &mut String::from("str1");
 
-//     *str1 = hello;
-// }
+    *str1 = hello;
+}
